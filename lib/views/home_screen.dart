@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'add_card_scan_screen.dart'; // Import the new scan screen
+import 'package:snapeasy/views/add_card_scan_screen.dart';
+import 'package:snapeasy/views/my_cards_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -34,10 +35,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showCardsAction() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Opening My Cards...")),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MyCardsScreen()),
     );
-    // TODO: Navigate to My Cards screen later
   }
 
   void _openAddCardScanner() {

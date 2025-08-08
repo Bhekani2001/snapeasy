@@ -28,11 +28,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: RepositoryProvider(
-        create: (context) => cardRepository,
-        child: SplashScreen(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CardBloc>(
+          create: (context) => CardBloc(CardViewModel(cardRepository)),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: RepositoryProvider(
+          create: (context) => cardRepository,
+          child: SplashScreen(),
+        ),
       ),
     );
   }

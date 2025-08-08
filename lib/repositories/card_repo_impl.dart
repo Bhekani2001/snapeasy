@@ -159,4 +159,13 @@ class CardRepoImpl implements CardRepository {
       debugPrint('Error migrating cards: $e');
     }
   }
+
+  static String detectCardType(String cardNumber) {
+    if (cardNumber.isEmpty) return '';
+    if (cardNumber.startsWith('4')) return 'visa';
+    if (cardNumber.startsWith('5')) return 'mastercard';
+    if (cardNumber.startsWith('34') || cardNumber.startsWith('37')) return 'amex';
+    if (cardNumber.startsWith('6')) return 'discover';
+    return '';
+  }
 }
