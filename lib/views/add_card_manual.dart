@@ -139,6 +139,7 @@ class _AddCardManualScreenState extends State<AddCardManualScreen> {
         return;
       }
       final countryObj = worldCountries.firstWhere((c) => c.name == _selectedCountry);
+      // Only define repo and detectedCardType once
       final repo = BlocProvider.of<CardBloc>(context).viewModel.repository;
       String detectedCardType = '';
       if (repo is CardRepoImpl) {
@@ -183,21 +184,8 @@ class _AddCardManualScreenState extends State<AddCardManualScreen> {
         );
         return;
       }
-      // Auto-detect cardType and bankName
-      // Use an instance of CardRepoImpl for detection
-      final repo = BlocProvider.of<CardBloc>(context).viewModel.repository;
-      String detectedCardType = '';
-      if (repo is CardRepoImpl) {
-        detectedCardType = repo.detectCardType(_cardNumberController.text);
-      } else {
-        // Fallback logic if repo is not CardRepoImpl
-        final cardNumber = _cardNumberController.text;
-        if (cardNumber.startsWith('4')) detectedCardType = 'visa';
-        else if (cardNumber.startsWith('5')) detectedCardType = 'mastercard';
-        else if (cardNumber.startsWith('34') || cardNumber.startsWith('37')) detectedCardType = 'amex';
-        else if (cardNumber.startsWith('6')) detectedCardType = 'discover';
-        else detectedCardType = '';
-      }
+  // Auto-detect cardType and bankName
+  // Already defined above
       String detectedBankName;
       final cardNumber = _cardNumberController.text;
       if (cardNumber.length >= 6) {
