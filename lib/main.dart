@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:snapeasy/bloc/card_bloc.dart';
 import 'package:snapeasy/bloc/card_event.dart';
 import 'package:snapeasy/repositories/card_repo_impl.dart';
 import 'package:snapeasy/repositories/card_repository.dart';
 import 'package:snapeasy/view_models/card_viewmodel.dart';
 import 'package:snapeasy/views/splash_screen.dart';
+import 'package:snapeasy/db/database_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final cardRepo = CardRepoImpl(prefs); // Initialize with SharedPreferences
-    runApp(MyApp(cardRepository: cardRepo));
-  } catch (e) {
-    debugPrint('Failed to initialize app: $e');
-    runApp(const ErrorApp());
-  }
+  final cardRepo = await DatabaseProvider.getCardRepo();
+  runApp(MyApp(cardRepository: cardRepo));
 }
 
 class MyApp extends StatelessWidget {

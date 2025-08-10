@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:snapeasy/models/card_model.dart';
-import 'dart:convert';
 import 'card_repository.dart';
 
 class CardRepoImpl implements CardRepository {
-  final SharedPreferences prefs;
-  static const String _cardsKey = 'cards';
+  final Database db;
 
-  CardRepoImpl(this.prefs);
+  CardRepoImpl(this.db);
 
   @override
   Future<List<CardModel>> getCards() async {
     try {
-      final cardsString = prefs.getString(_cardsKey);
-      if (cardsString == null || cardsString.isEmpty) return [];
-      
-      final List<dynamic> cardsJson = json.decode(cardsString);
-      return cardsJson.map((json) => CardModel.fromJson(json)).toList();
+      final List<Map<String, dynamic>> maps = await db.query('cards');
+      return maps.map((json) => CardModel.fromJson(json)).toList();
     } catch (e) {
       debugPrint('Error getting cards: $e');
       return [];
@@ -27,13 +22,35 @@ class CardRepoImpl implements CardRepository {
   @override
   Future<CardModel?> getCardById(String id) async {
     try {
-      final cards = await getCards();
-      return cards.firstWhere((card) => card.id == id);
-    } on StateError {
-      return null; // Card not found
+      final maps = await db.query('cards', where: 'id = ?', whereArgs: [id]);
+      if (maps.isNotEmpty) {
+        return CardModel.fromJson(maps.first);
+      }
+      return null;
     } catch (e) {
       debugPrint('Error getting card by ID: $e');
       return null;
+    }
+  }
+
+  String detectCardType(String cardNumber) {
+    if (cardNumber.isEmpty) return '';
+    if (cardNumber.startsWith('4')) return 'visa';
+    if (cardNumber.startsWith('5')) return 'mastercard';
+    if (cardNumber.startsWith('34') || cardNumber.startsWith('37')) return 'amex';
+    if (cardNumber.startsWith('6')) return 'discover';
+    return '';
+  }
+
+  String _detectBankName(String cardNumber) {
+    if (cardNumber.isEmpty || cardNumber.length < 6) return 'Unknown Bank';
+    final bin = cardNumber.substring(0, 6);
+    switch (bin) {
+      case '400000': return 'Bank of America';
+      case '510000': return 'Chase Bank';
+      case '340000': return 'American Express Bank';
+      case '601100': return 'Discover Bank';
+      default: return 'Unknown Bank';
     }
   }
 
@@ -43,10 +60,23 @@ class CardRepoImpl implements CardRepository {
       if (await isCardExists(card.cardNumber)) {
         throw Exception('Card with this number already exists');
       }
-      
-      final cards = await getCards();
-      cards.add(card);
-      await _saveAllCards(cards);
+      // Always auto-detect cardType and bankName before saving
+      final detectedCardType = card.cardType ?? detectCardType(card.cardNumber);
+      final detectedBankName = card.bankName ?? _detectBankName(card.cardNumber);
+      final updatedCard = CardModel(
+        id: card.id,
+        firstName: card.firstName,
+        lastName: card.lastName,
+        cardNumber: card.cardNumber,
+        cvv: card.cvv,
+        expiry: card.expiry,
+        country: card.country,
+        city: card.city,
+        pin: card.pin,
+        cardType: detectedCardType,
+        bankName: detectedBankName,
+      );
+      await db.insert('cards', updatedCard.toJson());
     } catch (e) {
       debugPrint('Error adding card: $e');
       rethrow;
@@ -56,37 +86,32 @@ class CardRepoImpl implements CardRepository {
   @override
   Future<void> updateCard(CardModel updatedCard) async {
     try {
-      final cards = await getCards();
-      final index = cards.indexWhere((c) => c.id == updatedCard.id);
-      
-      if (index == -1) {
-        throw Exception('Card not found');
-      }
-      
-      // Check if another card already has this number
-      final existingCard = cards.firstWhere(
-        (c) => c.cardNumber == updatedCard.cardNumber && c.id != updatedCard.id,
-        orElse: () => CardModel.empty(),
+      // Always auto-detect cardType and bankName before updating
+      final detectedCardType = updatedCard.cardType ?? detectCardType(updatedCard.cardNumber);
+      final detectedBankName = updatedCard.bankName ?? _detectBankName(updatedCard.cardNumber);
+      final cardToUpdate = CardModel(
+        id: updatedCard.id,
+        firstName: updatedCard.firstName,
+        lastName: updatedCard.lastName,
+        cardNumber: updatedCard.cardNumber,
+        cvv: updatedCard.cvv,
+        expiry: updatedCard.expiry,
+        country: updatedCard.country,
+        city: updatedCard.city,
+        pin: updatedCard.pin,
+        cardType: detectedCardType,
+        bankName: detectedBankName,
       );
-      
-      if (existingCard.id.isNotEmpty) {
-        throw Exception('Another card already uses this number');
-      }
-      
-      cards[index] = updatedCard;
-      await _saveAllCards(cards);
+      await db.update('cards', cardToUpdate.toJson(), where: 'id = ?', whereArgs: [updatedCard.id]);
     } catch (e) {
       debugPrint('Error updating card: $e');
       rethrow;
     }
   }
-
   @override
   Future<void> removeCard(String id) async {
     try {
-      final cards = await getCards();
-      cards.removeWhere((c) => c.id == id);
-      await _saveAllCards(cards);
+      await db.delete('cards', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       debugPrint('Error removing card: $e');
       rethrow;
@@ -96,8 +121,8 @@ class CardRepoImpl implements CardRepository {
   @override
   Future<bool> isCardExists(String cardNumber) async {
     try {
-      final cards = await getCards();
-      return cards.any((card) => card.cardNumber == cardNumber);
+      final maps = await db.query('cards', where: 'cardNumber = ?', whereArgs: [cardNumber]);
+      return maps.isNotEmpty;
     } catch (e) {
       debugPrint('Error checking card existence: $e');
       return false;
@@ -107,7 +132,7 @@ class CardRepoImpl implements CardRepository {
   @override
   Future<void> clearAllCards() async {
     try {
-      await prefs.remove(_cardsKey);
+      await db.delete('cards');
     } catch (e) {
       debugPrint('Error clearing all cards: $e');
       rethrow;
@@ -117,55 +142,20 @@ class CardRepoImpl implements CardRepository {
   @override
   Future<int> getCardCount() async {
     try {
-      final cards = await getCards();
-      return cards.length;
+      final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM cards'));
+      return count ?? 0;
     } catch (e) {
       debugPrint('Error getting card count: $e');
       return 0;
     }
   }
 
-  Future<void> _saveAllCards(List<CardModel> cards) async {
-    try {
-      final cardsJson = cards.map((c) => c.toJson()).toList();
-      await prefs.setString(_cardsKey, json.encode(cardsJson));
-    } catch (e) {
-      debugPrint('Error saving cards: $e');
-      rethrow;
-    }
-  }
+  // No longer needed with SQLite
 
   @override
   Future<void> migrateOldCardsIfNeeded() async {
-    try {
-      final cards = await getCards();
-      if (cards.isNotEmpty && cards.any((c) => c.id.isEmpty)) {
-        final migratedCards = cards.map((c) => c.id.isEmpty 
-            ? CardModel(
-                id: CardModel.generateId(),
-                firstName: c.firstName,
-                lastName: c.lastName,
-                cardNumber: c.cardNumber,
-                cvv: c.cvv,
-                expiry: c.expiry,
-                country: c.country,
-                city: c.city,
-              )
-            : c).toList();
-        
-        await _saveAllCards(migratedCards);
-      }
-    } catch (e) {
-      debugPrint('Error migrating cards: $e');
-    }
+    // No migration needed for SQLite
+    return;
   }
 
-  static String detectCardType(String cardNumber) {
-    if (cardNumber.isEmpty) return '';
-    if (cardNumber.startsWith('4')) return 'visa';
-    if (cardNumber.startsWith('5')) return 'mastercard';
-    if (cardNumber.startsWith('34') || cardNumber.startsWith('37')) return 'amex';
-    if (cardNumber.startsWith('6')) return 'discover';
-    return '';
-  }
 }

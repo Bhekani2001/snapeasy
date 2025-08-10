@@ -7,6 +7,9 @@ class CardModel {
   final String expiry;
   final String country;
   final String city;
+  final String pin;
+  final String? cardType;
+  final String? bankName;
 
   CardModel({
     String? id,
@@ -17,6 +20,9 @@ class CardModel {
     required this.expiry,
     required this.country,
     required this.city,
+    required this.pin,
+    this.cardType,
+    this.bankName,
   }) : id = id ?? generateId();
 
   static String generateId() => DateTime.now().microsecondsSinceEpoch.toString();
@@ -30,27 +36,43 @@ class CardModel {
         cvv = '',
         expiry = '',
         country = '',
-        city = '';
+        city = '',
+        pin = '',
+        cardType = null,
+        bankName = null;
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'firstName': firstName,
-    'lastName': lastName,
-    'cardNumber': cardNumber,
-    'cvv': cvv,
-    'expiry': expiry,
-    'country': country,
-    'city': city,
+  'id': id,
+  'firstName': firstName,
+  'lastName': lastName,
+  'cardNumber': cardNumber,
+  'cvv': cvv,
+  'expiry': expiry,
+  'country': country,
+  'city': city,
+  'pin': pin,
+  'cardType': cardType,
+  'bankName': bankName,
   };
 
-  factory CardModel.fromJson(Map<String, dynamic> json) => CardModel(
-    id: json['id'] ?? generateId(),
-    firstName: json['firstName'],
-    lastName: json['lastName'],
-    cardNumber: json['cardNumber'],
-    cvv: json['cvv'],
-    expiry: json['expiry'],
-    country: json['country'],
-    city: json['city'],
-  );
+  factory CardModel.fromJson(Map<String, dynamic> json) {
+    return CardModel(
+      id: json['id']?.toString(),
+      firstName: json['firstName']?.toString() ?? '',
+      lastName: json['lastName']?.toString() ?? '',
+      cardNumber: json['cardNumber']?.toString() ?? '',
+      cvv: json['cvv']?.toString() ?? '',
+      expiry: json['expiry']?.toString() ?? '',
+      country: json['country']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      pin: json['pin']?.toString() ?? '',
+      cardType: json['cardType']?.toString(),
+      bankName: json['bankName']?.toString(),
+    );
+  }
+
+  @override
+  String toString() {
+  return 'CardModel(id: $id, name: $firstName $lastName, last4: ${cardNumber.length >= 4 ? cardNumber.substring(cardNumber.length - 4) : cardNumber})';
+  }
 }

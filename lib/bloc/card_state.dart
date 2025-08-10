@@ -40,3 +40,14 @@ class CardError extends CardState {
   final String message;
   CardError(this.message);
 }
+
+class CardBanChecked extends CardState {
+  final bool isBanned;
+  final String? bannedMessage;
+  CardBanChecked({required this.isBanned, this.bannedMessage});
+}
+
+class CardBanned extends CardState {
+  final String bannedMessage;
+  CardBanned(this.bannedMessage);
+}

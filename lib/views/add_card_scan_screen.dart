@@ -5,6 +5,7 @@ import 'package:snapeasy/bloc/card_bloc.dart';
 import 'package:snapeasy/bloc/card_event.dart';
 import 'package:snapeasy/models/card_model.dart';
 import 'package:snapeasy/repositories/card_repo_impl.dart';
+import 'package:snapeasy/views/add_card_manual.dart';
 import 'package:snapeasy/views/card_success.dart';
 
 class AddCardScanScreen extends StatefulWidget {
@@ -13,41 +14,69 @@ class AddCardScanScreen extends StatefulWidget {
 }
 
 class _AddCardScanScreenState extends State<AddCardScanScreen> {
+  String? _cardType;
+  String? _bankName;
+
+  String? _detectCardType(String? cardNumber) {
+    if (cardNumber == null) return null;
+    if (cardNumber.startsWith('4')) return 'Visa';
+    if (cardNumber.startsWith('5')) return 'MasterCard';
+    if (cardNumber.startsWith('3')) return 'American Express';
+    if (cardNumber.startsWith('6')) return 'Discover';
+    return 'Unknown';
+  }
+
+  String? _detectBankName(String? cardNumber) {
+    if (cardNumber == null || cardNumber.length < 6) return null;
+    // Example: Use BIN (first 6 digits) for demo purposes
+    final bin = cardNumber.substring(0, 6);
+    switch (bin) {
+      case '400000': return 'Bank of America';
+      case '510000': return 'Chase Bank';
+      case '340000': return 'American Express Bank';
+      case '601100': return 'Discover Bank';
+      default: return 'Unknown Bank';
+    }
+  }
   CardDetails? _cardDetails;
   bool _isScanning = false;
   final TextEditingController _cvvController = TextEditingController();
+  final TextEditingController _pinController = TextEditingController();
 
   Future<void> _scanCard() async {
     setState(() => _isScanning = true);
+
     final CardDetails? details = await CardScanner.scanCard(
-      scanOptions: CardScanOptions(
+      scanOptions: const CardScanOptions(
         scanCardHolderName: true,
         validCardsToScanBeforeFinishingScan: 1,
       ),
     );
+
     setState(() {
       _isScanning = false;
       _cardDetails = details;
+      _cardType = _detectCardType(details?.cardNumber);
+      _bankName = _detectBankName(details?.cardNumber);
     });
+
+    // If card number and expiry are recognized, show success, wait 2 seconds, then open manual form
+    if (details != null && details.cardNumber != null && details.expiryDate != null) {
+      await Future.delayed(Duration(seconds: 2));
+      _continueToManualForm();
+    }
   }
 
-  void _saveCard() async {
-    if (_cardDetails == null || _cvvController.text.isEmpty) return;
-    final card = CardModel(
-      firstName: _cardDetails!.cardHolderName ?? '',
-      lastName: '',
-      cardNumber: _cardDetails!.cardNumber,
-      cvv: _cvvController.text,
-      expiry: _cardDetails!.expiryDate,
-      country: '',
-      city: '',
-    );
-    // Save card and wait for completion
-    BlocProvider.of<CardBloc>(context).add(AddCard(card));
-    await Future.delayed(Duration(milliseconds: 500)); // Give BLoC time to persist
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => CardSuccessScreen(isManual: false)),
+  void _continueToManualForm() async {
+    if (_cardDetails == null) return;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AddCardManualScreen(
+        initialCardNumber: _cardDetails!.cardNumber,
+        initialExpiry: _cardDetails!.expiryDate,
+        initialCVV: _cvvController.text,
+      ),
     );
   }
 
@@ -118,35 +147,54 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
                         SizedBox(height: 20),
                         Text("Card scanned successfully!", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                         SizedBox(height: 16),
-                        _infoRow("Card Number:", _cardDetails!.cardNumber),
-                        _infoRow("Expiry Date:", _cardDetails!.expiryDate),
-                        _infoRow("Cardholder Name:", _cardDetails!.cardHolderName ?? "N/A"),
+                        _infoRow("Card Number:", _cardDetails!.cardNumber ?? ''),
+                        _infoRow("Expiry Date:", _cardDetails!.expiryDate ?? ''),
+                        _infoRow("Cardholder Name:", _cardDetails!.cardHolderName ?? ''),
+                        if (_cardType != null)
+                          _infoRow("Card Type:", _cardType!),
+                        if (_bankName != null)
+                          _infoRow("Bank Name:", _bankName!),
                         SizedBox(height: 24),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                          child: TextField(
-                            controller: _cvvController,
-                            keyboardType: TextInputType.number,
-                            maxLength: 4,
-                            decoration: InputDecoration(
-                              labelText: 'CVV',
-                              border: OutlineInputBorder(),
-                              counterText: '',
-                            ),
-                            obscureText: true,
+                          child: Column(
+                            children: [
+                              TextField(
+                                controller: _cvvController,
+                                keyboardType: TextInputType.number,
+                                maxLength: 4,
+                                decoration: InputDecoration(
+                                  labelText: 'CVV',
+                                  border: OutlineInputBorder(),
+                                  counterText: '',
+                                ),
+                                obscureText: true,
+                              ),
+                              SizedBox(height: 12),
+                              TextField(
+                                controller: _pinController,
+                                keyboardType: TextInputType.number,
+                                maxLength: 6,
+                                decoration: InputDecoration(
+                                  labelText: 'Card PIN',
+                                  border: OutlineInputBorder(),
+                                  counterText: '',
+                                ),
+                                obscureText: true,
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 12),
                         ElevatedButton.icon(
-                          icon: Icon(Icons.save),
-                          label: Text('Save Card'),
+                          icon: Icon(Icons.arrow_forward),
+                          label: Text('Continue'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF56ab2f),
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                             textStyle: TextStyle(fontSize: 18),
                           ),
-                          onPressed: _cvvController.text.isEmpty ? null : _saveCard,
+                          onPressed: _cvvController.text.isEmpty ? null : _continueToManualForm,
                         ),
                       ],
                     ),
@@ -192,163 +240,13 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
                   await showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-                    builder: (context) => _ManualCardForm(),
+                    builder: (context) => AddCardManualScreen(),
                   );
                 },
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ManualCardForm extends StatefulWidget {
-  @override
-  State<_ManualCardForm> createState() => _ManualCardFormState();
-}
-
-class _ManualCardFormState extends State<_ManualCardForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _cardNumberController = TextEditingController();
-  final _cvvController = TextEditingController();
-  final _expiryController = TextEditingController();
-  final _countryController = TextEditingController();
-  final _cityController = TextEditingController();
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _cardNumberController.dispose();
-    _cvvController.dispose();
-    _expiryController.dispose();
-    _countryController.dispose();
-    _cityController.dispose();
-    super.dispose();
-  }
-
-  Widget _cardTypeIcon(String cardNumber) {
-    final type = CardRepoImpl.detectCardType(cardNumber);
-    switch (type) {
-      case 'mastercard':
-        return Icon(Icons.credit_card, color: Colors.deepPurple, size: 32);
-      case 'visa':
-        return Icon(Icons.credit_card, color: Colors.blue, size: 32);
-      case 'amex':
-        return Icon(Icons.credit_card, color: Colors.green, size: 32);
-      case 'discover':
-        return Icon(Icons.credit_card, color: Colors.orange, size: 32);
-      default:
-        return Icon(Icons.credit_card, color: Colors.grey, size: 32);
-    }
-  }
-
-  void _submit() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final card = CardModel(
-        firstName: _firstNameController.text,
-        lastName: _lastNameController.text,
-        cardNumber: _cardNumberController.text,
-        cvv: _cvvController.text,
-        expiry: _expiryController.text,
-        country: _countryController.text,
-        city: _cityController.text,
-      );
-      BlocProvider.of<CardBloc>(context).add(AddCard(card));
-      await Future.delayed(Duration(milliseconds: 500)); // Give BLoC time to persist
-      Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => CardSuccessScreen(isManual: true)),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Add Card Manually', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: InputDecoration(labelText: 'First Name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: InputDecoration(labelText: 'Last Name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _cardNumberController,
-                decoration: InputDecoration(
-                  labelText: 'Card Number',
-                  suffixIcon: _cardTypeIcon(_cardNumberController.text),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                onChanged: (_) => setState(() {}),
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _cvvController,
-                decoration: InputDecoration(labelText: 'CVV'),
-                keyboardType: TextInputType.number,
-                obscureText: true,
-                maxLength: 4,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _expiryController,
-                decoration: InputDecoration(labelText: 'Expiry Date (MM/YY)'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _countryController,
-                decoration: InputDecoration(labelText: 'Country'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _cityController,
-                decoration: InputDecoration(labelText: 'City'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton.icon(
-                icon: Icon(Icons.save),
-                label: Text('Save Card'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF56ab2f),
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  textStyle: TextStyle(fontSize: 18),
-                ),
-                onPressed: _submit,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

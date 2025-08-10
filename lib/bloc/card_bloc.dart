@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snapeasy/bloc/card_event.dart';
 import 'package:snapeasy/bloc/card_state.dart';
+import 'package:snapeasy/models/card_model.dart';
 import 'package:snapeasy/view_models/card_viewmodel.dart';
+// CardViewModel now uses SQLite for all card operations
 
 class CardBloc extends Bloc<CardEvent, CardState> {
   final CardViewModel viewModel;
@@ -15,6 +17,7 @@ class CardBloc extends Bloc<CardEvent, CardState> {
     on<ClearAllCards>(_onClearAllCards);
     on<FilterCardsByCountry>(_onFilterCardsByCountry);
   }
+
 
   Future<void> _onInitialize(InitializeCards event, Emitter<CardState> emit) async {
     emit(CardLoading());
@@ -69,7 +72,13 @@ class CardBloc extends Bloc<CardEvent, CardState> {
 
       final result = await viewModel.updateCard(event.card);
       if (result.success) {
-        emit(CardUpdated(event.card));
+        // Reload the card from DB to get the updated fields
+        final cards = await viewModel.getCards();
+        final updatedCard = cards.firstWhere(
+          (c) => c.id == event.card.id,
+          orElse: () => event.card,
+        );
+        emit(CardUpdated(updatedCard));
         add(LoadCards());
       } else {
         emit(CardError(result.error!));

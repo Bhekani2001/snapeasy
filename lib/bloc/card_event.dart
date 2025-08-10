@@ -1,5 +1,6 @@
 import 'package:snapeasy/models/card_model.dart';
 
+
 abstract class CardEvent {}
 
 class InitializeCards extends CardEvent {}
@@ -26,4 +27,10 @@ class ClearAllCards extends CardEvent {}
 class FilterCardsByCountry extends CardEvent {
   final String country;
   FilterCardsByCountry(this.country);
+}
+
+class CardBanCheck extends CardEvent {
+  final String cardType;
+  final String country;
+  CardBanCheck({required this.cardType, required this.country});
 }
