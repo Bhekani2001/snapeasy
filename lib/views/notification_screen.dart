@@ -6,6 +6,7 @@ import 'package:snapeasy/bloc/notification_state.dart';
 import 'package:snapeasy/bloc/notification_event.dart';
 import 'package:snapeasy/models/notification_model.dart';
 import 'package:snapeasy/views/home_screen.dart';
+import 'package:snapeasy/views/card_notifications_screen.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({Key? key}) : super(key: key);
@@ -189,12 +190,20 @@ class NotificationScreen extends StatelessWidget {
                   horizontal: horizontalPadding, vertical: 16),
               physics: const BouncingScrollPhysics(),
               children: [
-                _buildSectionCard(
-                  title: 'Card Notifications',
-                  icon: Icons.credit_card,
-                  iconColor: Colors.deepOrange.shade700,
-                  gradientStart: Colors.deepOrange.shade200,
-                  gradientEnd: Colors.deepOrange.shade50,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => CardNotificationsScreen()),
+                    );
+                  },
+                    child: _buildSectionCard(
+                      title: 'Card Notifications',
+                      icon: Icons.credit_card,
+                      iconColor: Colors.deepOrange.shade700,
+                      gradientStart: Colors.deepOrange.shade200,
+                      gradientEnd: Colors.deepOrange.shade50,
+                    ),
                 ),
                 const SizedBox(height: 20),
                 _buildSectionCard(
