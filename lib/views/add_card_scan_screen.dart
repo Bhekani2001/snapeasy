@@ -25,16 +25,45 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
 
   String? _detectBankName(String? cardNumber) {
     if (cardNumber == null || cardNumber.length < 6) return null;
-    // Example: Use BIN (first 6 digits) for demo purposes
     final bin = cardNumber.substring(0, 6);
     switch (bin) {
-      case '400000': return 'Bank of America';
-      case '510000': return 'Chase Bank';
-      case '340000': return 'American Express Bank';
-      case '601100': return 'Discover Bank';
-      default: return 'Unknown Bank';
+      // Capitec Bank
+      case '528497':
+      case '528498':
+      case '528499':
+        return 'Capitec Bank';
+
+      // Absa Bank
+      case '603493':
+      case '603494':
+      case '627010':
+        return 'Absa Bank';
+
+      // FNB (First National Bank)
+      case '520000':
+      case '520001':
+      case '436414':
+      case '521234':
+        return 'FNB';
+
+      // Nedbank (specific bins)
+      case '450801':
+      case '450802':
+      case '450803':
+      case '450804':
+      case '540000':
+      case '541000':
+        return 'Nedbank';
+
+      default:
+        final binInt = int.tryParse(bin);
+        if (binInt != null && binInt >= 541200 && binInt <= 541299) {
+          return 'Nedbank';
+        }
+        return 'Unknown Bank';
     }
   }
+
   CardDetails? _cardDetails;
   bool _isScanning = false;
   final TextEditingController _cvvController = TextEditingController();
@@ -57,7 +86,6 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
       _bankName = _detectBankName(details?.cardNumber);
     });
 
-    // If card number and expiry are recognized, show success, wait 2 seconds, then open manual form
     if (details != null) {
       await Future.delayed(Duration(seconds: 2));
       _continueToManualForm();
@@ -66,7 +94,6 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
 
   void _continueToManualForm() async {
     if (_cardDetails == null) return;
-    // Check if card already exists
     final cardBloc = BlocProvider.of<CardBloc>(context);
     final repo = cardBloc.viewModel.repository;
     final cardNumber = _cardDetails!.cardNumber;

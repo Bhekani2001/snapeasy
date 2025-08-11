@@ -17,16 +17,15 @@ class CardNotificationsScreen extends StatelessWidget {
         builder: (context, state) {
           if (state is CardsLoaded) {
             final now = DateTime.now();
-            final fourYearsFromNow = DateTime(now.year + 4, now.month);
+            final fourYearsFromNow = DateTime(now.year + 3, now.month);
             final expiringCards = state.cards.where((card) {
               try {
-                // Parse MM/YY expiry manually
                 final parts = card.expiry.split('/');
                 if (parts.length != 2) return false;
                 final month = int.tryParse(parts[0]);
                 final year = int.tryParse(parts[1]);
                 if (month == null || year == null) return false;
-                // Assume year is 2000+ for YY
+
                 final exp = DateTime(2000 + year, month);
                 return exp.isBefore(fourYearsFromNow);
               } catch (_) {
