@@ -1,36 +1,43 @@
 import 'package:snapeasy/models/card_model.dart';
 
+abstract class CardEvent {
+  const CardEvent();
+}
 
-abstract class CardEvent {}
+class InitializeCards extends CardEvent {
+  const InitializeCards();
+}
 
-class InitializeCards extends CardEvent {}
-
-class LoadCards extends CardEvent {}
+class LoadCards extends CardEvent {
+  const LoadCards();
+}
 
 class AddCard extends CardEvent {
   final CardModel card;
-  AddCard(this.card);
+  const AddCard(this.card);
 }
 
 class UpdateCard extends CardEvent {
   final CardModel card;
-  UpdateCard(this.card);
+  const UpdateCard(this.card);
 }
 
 class RemoveCard extends CardEvent {
   final String id;
-  RemoveCard(this.id);
+  const RemoveCard(this.id);
 }
 
-class ClearAllCards extends CardEvent {}
+class ClearAllCards extends CardEvent {
+  const ClearAllCards();
+}
 
 class FilterCardsByCountry extends CardEvent {
   final String country;
-  FilterCardsByCountry(this.country);
+  const FilterCardsByCountry(this.country);
 }
 
 class CardBanCheck extends CardEvent {
   final String cardType;
   final String country;
-  CardBanCheck({required this.cardType, required this.country});
+  const CardBanCheck({required this.cardType, required this.country});
 }

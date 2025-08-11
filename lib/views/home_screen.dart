@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(Icons.waving_hand_rounded, size: 52, color: Colors.white),
+            const Icon(Icons.waving_hand_rounded, size: 52, color: Colors.white, semanticLabel: 'Welcome icon'),
             const SizedBox(width: 16),
             const Expanded(
               child: Text(
@@ -77,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.w600,
                   height: 1.3,
                 ),
+                semanticsLabel: 'Welcome message',
               ),
             ),
           ],
@@ -135,8 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildStaticCard(CardModel card) {
     final displayName =
-        "${card.firstName ?? ''} ${card.lastName ?? ''}".trim();
-    final cardNumber = card.cardNumber ?? '';
+        "${card.firstName} ${card.lastName}".trim();
+    final cardNumber = card.cardNumber;
     final maskedNumber = cardNumber.length >= 4
         ? "•••• •••• •••• ${cardNumber.substring(cardNumber.length - 4)}"
         : "•••• •••• ••••";
@@ -168,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white70, fontSize: 16, letterSpacing: 1.5)),
           const Align(
             alignment: Alignment.bottomRight,
-            child: Icon(Icons.credit_card, color: Colors.white70, size: 32),
+            child: Icon(Icons.credit_card, color: Colors.white70, size: 32, semanticLabel: 'Card icon'),
           ),
         ],
       ),
@@ -177,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 500;
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -186,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
                 color: Color(0xFF2980B9), fontWeight: FontWeight.bold)),
         centerTitle: true,
-        // Removed notification icon here
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -11,51 +11,61 @@ class NotificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Container(
-        width: 350,
-        padding: EdgeInsets.all(24),
+        width: 370,
+        padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Notifications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.notifications_active, color: Color(0xFF2980B9), size: 28),
+                const SizedBox(width: 10),
+                Text('Notifications', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 18),
             BlocBuilder<NotificationBloc, NotificationState>(
               builder: (context, state) {
                 if (state is NotificationLoading) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (state is NotificationsLoaded) {
                   if (state.notifications.isEmpty) {
-                    return Text('No notifications.');
+                    return const Text('No notifications.', style: TextStyle(color: Colors.black54));
                   }
-                  return ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: state.notifications.length,
-                    separatorBuilder: (_, __) => Divider(),
-                    itemBuilder: (context, index) {
-                      final notif = state.notifications[index];
-                      return ListTile(
-                        title: Text(notif.title),
-                        subtitle: Text(notif.body),
-                        trailing: notif.read ? null : Icon(Icons.circle, color: Colors.red, size: 12),
-                        onTap: () {
-                          BlocProvider.of<NotificationBloc>(context).add(MarkNotificationAsRead(notif.id));
-                        },
-                      );
-                    },
+                  return SizedBox(
+                    height: 260,
+                    child: ListView.separated(
+                      itemCount: state.notifications.length,
+                      separatorBuilder: (_, __) => const Divider(),
+                      itemBuilder: (context, index) {
+                        final notif = state.notifications[index];
+                        return ListTile(
+                          title: Text(notif.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          subtitle: Text(notif.body, style: const TextStyle(color: Colors.black87)),
+                          trailing: notif.read ? null : const Icon(Icons.circle, color: Colors.red, size: 12),
+                          onTap: () {
+                            BlocProvider.of<NotificationBloc>(context).add(MarkNotificationAsRead(notif.id));
+                          },
+                          tileColor: notif.read ? Colors.grey[100] : Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        );
+                      },
+                    ),
                   );
                 } else if (state is NotificationError) {
-                  return Text('Error: ${state.message}');
+                  return Text('Error: ${state.message}', style: const TextStyle(color: Colors.redAccent));
                 }
-                return SizedBox.shrink();
+                return const SizedBox.shrink();
               },
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 28),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  child: Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

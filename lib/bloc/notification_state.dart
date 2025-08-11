@@ -1,14 +1,30 @@
 import 'package:snapeasy/models/notification_model.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class NotificationState {}
+abstract class NotificationState extends Equatable {
+  const NotificationState();
+  @override
+  List<Object?> get props => [];
+}
 
-class NotificationInitial extends NotificationState {}
-class NotificationLoading extends NotificationState {}
+class NotificationInitial extends NotificationState {
+  const NotificationInitial();
+}
+
+class NotificationLoading extends NotificationState {
+  const NotificationLoading();
+}
+
 class NotificationsLoaded extends NotificationState {
   final List<NotificationModel> notifications;
-  NotificationsLoaded(this.notifications);
+  const NotificationsLoaded(this.notifications);
+  @override
+  List<Object?> get props => [notifications];
 }
+
 class NotificationError extends NotificationState {
   final String message;
-  NotificationError(this.message);
+  const NotificationError(this.message);
+  @override
+  List<Object?> get props => [message];
 }

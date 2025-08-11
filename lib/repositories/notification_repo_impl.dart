@@ -6,7 +6,7 @@ class NotificationRepoImpl implements NotificationRepository {
 
   @override
   Future<List<NotificationModel>> getNotifications() async {
-    return _notifications;
+    return List.unmodifiable(_notifications);
   }
 
   @override
@@ -16,9 +16,10 @@ class NotificationRepoImpl implements NotificationRepository {
 
   @override
   Future<void> markAsRead(String id) async {
-    final notif = _notifications.firstWhere((n) => n.id == id, orElse: () => NotificationModel(id: '', title: '', body: '', date: DateTime.now()));
-    if (notif.id.isNotEmpty) {
-      notif.read = true;
+    final index = _notifications.indexWhere((n) => n.id == id);
+    if (index != -1) {
+      final notif = _notifications[index];
+      _notifications[index] = notif.copyWith(read: true);
     }
   }
 

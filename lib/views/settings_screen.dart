@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
-  final settings = const [
+  static const settings = [
     {'title': 'Card Settings', 'icon': Icons.credit_card},
     {'title': 'Transaction Settings', 'icon': Icons.receipt_long},
     {'title': 'Notifications', 'icon': Icons.notifications},
@@ -23,17 +23,24 @@ class SettingsScreen extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.15),
-                Colors.white.withOpacity(0.05),
+                Colors.white.withOpacity(0.18),
+                Colors.white.withOpacity(0.07),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1.2,
+              color: Colors.white.withOpacity(0.22),
+              width: 1.4,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: child,
         ),
@@ -64,6 +71,7 @@ class SettingsScreen extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     height: 1.3,
                   ),
+                  semanticsLabel: 'Welcome message',
                 ),
               ),
             ],
@@ -80,13 +88,18 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: 14,
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: () {},
-          splashColor: Colors.white.withOpacity(0.05),
+          onTap: () {
+            // TODO: Implement navigation for each setting
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${item['title']} tapped'), backgroundColor: Colors.blueAccent),
+            );
+          },
+          splashColor: Colors.white.withOpacity(0.07),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                Icon(item['icon'] as IconData, color: Colors.white, size: 26),
+                Icon(item['icon'] as IconData, color: Colors.white, size: 26, semanticLabel: item['title'] as String),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
@@ -96,6 +109,7 @@ class SettingsScreen extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: Colors.white,
                     ),
+                    semanticsLabel: item['title'] as String,
                   ),
                 ),
                 const Icon(Icons.chevron_right, color: Colors.white70),
@@ -123,20 +137,26 @@ class SettingsScreen extends StatelessWidget {
           title: Text(
             'Settings',
             style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+            semanticsLabel: 'Settings',
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
-        body: ListView.separated(
-          physics: const BouncingScrollPhysics(),
-          itemCount: settings.length + 1,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
-          padding: const EdgeInsets.all(16),
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return _buildTopCard(context);
-            }
-            return _buildSettingTile(context, settings[index - 1], index - 1);
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth > 500;
+            return ListView.separated(
+              physics: const BouncingScrollPhysics(),
+              itemCount: settings.length + 1,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              padding: EdgeInsets.symmetric(horizontal: isWide ? constraints.maxWidth * 0.2 : 16, vertical: 16),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return _buildTopCard(context);
+                }
+                return _buildSettingTile(context, settings[index - 1], index - 1);
+              },
+            );
           },
         ),
       ),

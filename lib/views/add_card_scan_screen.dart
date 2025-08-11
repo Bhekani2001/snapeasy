@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:card_scanner/card_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snapeasy/bloc/card_bloc.dart';
-import 'package:snapeasy/bloc/card_event.dart';
-import 'package:snapeasy/models/card_model.dart';
 import 'package:snapeasy/repositories/card_repo_impl.dart';
 import 'package:snapeasy/views/add_card_manual.dart';
-import 'package:snapeasy/views/card_success.dart';
 
 class AddCardScanScreen extends StatefulWidget {
   @override
@@ -61,7 +58,7 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
     });
 
     // If card number and expiry are recognized, show success, wait 2 seconds, then open manual form
-    if (details != null && details.cardNumber != null && details.expiryDate != null) {
+    if (details != null) {
       await Future.delayed(Duration(seconds: 2));
       _continueToManualForm();
     }
@@ -75,7 +72,7 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
     final cardNumber = _cardDetails!.cardNumber;
     bool exists = false;
     if (repo is CardRepoImpl) {
-      exists = await repo.isCardExists(cardNumber ?? '');
+      exists = await repo.isCardExists(cardNumber);
     }
     if (exists) {
       showDialog(
@@ -187,9 +184,9 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
                         SizedBox(height: 20),
                         Text("Card scanned successfully!", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                         SizedBox(height: 16),
-                        _infoRow("Card Number:", _cardDetails!.cardNumber ?? ''),
-                        _infoRow("Expiry Date:", _cardDetails!.expiryDate ?? ''),
-                        _infoRow("Cardholder Name:", _cardDetails!.cardHolderName ?? ''),
+                        _infoRow("Card Number:", _cardDetails!.cardNumber),
+                        _infoRow("Expiry Date:", _cardDetails!.expiryDate),
+                        _infoRow("Cardholder Name:", _cardDetails!.cardHolderName),
                         if (_cardType != null)
                           _infoRow("Card Type:", _cardType!),
                         if (_bankName != null)

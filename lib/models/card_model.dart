@@ -1,4 +1,6 @@
-class CardModel {
+import 'package:equatable/equatable.dart';
+
+class CardModel extends Equatable {
   final String id;
   final String firstName;
   final String lastName;
@@ -13,21 +15,31 @@ class CardModel {
 
   CardModel({
     String? id,
-    required this.firstName,
-    required this.lastName,
-    required this.cardNumber,
-    required this.cvv,
-    required this.expiry,
-    required this.country,
-    required this.city,
-    required this.pin,
-    this.cardType,
-    this.bankName,
-  }) : id = id ?? generateId();
+    required String firstName,
+    required String lastName,
+    required String cardNumber,
+    required String cvv,
+    required String expiry,
+    required String country,
+    required String city,
+    required String pin,
+    String? cardType,
+    String? bankName,
+  }) :
+    id = id ?? _generateId(),
+    firstName = firstName,
+    lastName = lastName,
+    cardNumber = cardNumber,
+    cvv = cvv,
+    expiry = expiry,
+    country = country,
+    city = city,
+    pin = pin,
+    cardType = cardType,
+    bankName = bankName;
 
-  static String generateId() => DateTime.now().microsecondsSinceEpoch.toString();
+  static String _generateId() => DateTime.now().microsecondsSinceEpoch.toString();
 
-  // Empty constructor for edge cases
   CardModel.empty()
       : id = '',
         firstName = '',
@@ -42,17 +54,17 @@ class CardModel {
         bankName = null;
 
   Map<String, dynamic> toJson() => {
-  'id': id,
-  'firstName': firstName,
-  'lastName': lastName,
-  'cardNumber': cardNumber,
-  'cvv': cvv,
-  'expiry': expiry,
-  'country': country,
-  'city': city,
-  'pin': pin,
-  'cardType': cardType,
-  'bankName': bankName,
+    'id': id,
+    'firstName': firstName,
+    'lastName': lastName,
+    'cardNumber': cardNumber,
+    'cvv': cvv,
+    'expiry': expiry,
+    'country': country,
+    'city': city,
+    'pin': pin,
+    'cardType': cardType,
+    'bankName': bankName,
   };
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
@@ -73,6 +85,50 @@ class CardModel {
 
   @override
   String toString() {
-  return 'CardModel(id: $id, name: $firstName $lastName, last4: ${cardNumber.length >= 4 ? cardNumber.substring(cardNumber.length - 4) : cardNumber})';
+    final last4 = cardNumber.length >= 4 ? cardNumber.substring(cardNumber.length - 4) : cardNumber;
+    return 'CardModel(id: $id, name: $firstName $lastName, last4: $last4)';
+  }
+
+  @override
+  List<Object?> get props => [
+    id,
+    firstName,
+    lastName,
+    cardNumber,
+    cvv,
+    expiry,
+    country,
+    city,
+    pin,
+    cardType,
+    bankName,
+  ];
+
+  CardModel copyWith({
+    String? id,
+    String? firstName,
+    String? lastName,
+    String? cardNumber,
+    String? cvv,
+    String? expiry,
+    String? country,
+    String? city,
+    String? pin,
+    String? cardType,
+    String? bankName,
+  }) {
+    return CardModel(
+      id: id ?? this.id,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      cardNumber: cardNumber ?? this.cardNumber,
+      cvv: cvv ?? this.cvv,
+      expiry: expiry ?? this.expiry,
+      country: country ?? this.country,
+      city: city ?? this.city,
+      pin: pin ?? this.pin,
+      cardType: cardType ?? this.cardType,
+      bankName: bankName ?? this.bankName,
+    );
   }
 }

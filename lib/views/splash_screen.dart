@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:snapeasy/views/home_screen.dart'; 
+import 'package:snapeasy/views/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  @override 
+  @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
@@ -21,14 +21,14 @@ class _SplashScreenState extends State<SplashScreen>
 
     _bounceController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
     );
     _bounceAnimation =
         CurvedAnimation(parent: _bounceController, curve: Curves.elasticOut);
 
     _rippleController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
     _rippleAnimation =
@@ -37,13 +37,12 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeInOut,
     ));
 
-    Timer(Duration(milliseconds: 800), () {
+    Timer(const Duration(milliseconds: 800), () {
       setState(() => _fadeIn = true);
       _bounceController.forward();
     });
 
-    // Navigate to HomeScreen after 3 seconds
-    Timer(Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => HomeScreen()),
@@ -60,10 +59,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 400;
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFF6DD5FA),
@@ -81,10 +81,10 @@ class _SplashScreenState extends State<SplashScreen>
               animation: _rippleAnimation,
               builder: (context, child) {
                 return Container(
-                  padding: EdgeInsets.all(20 + _rippleAnimation.value),
+                  padding: EdgeInsets.all((isWide ? 30 : 20) + _rippleAnimation.value),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withOpacity(0.12),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.white.withOpacity(0.4),
@@ -95,39 +95,42 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   child: Icon(
                     Icons.credit_card_rounded,
-                    size: 80,
+                    size: isWide ? 110 : 80,
                     color: Colors.white,
+                    semanticLabel: 'App logo',
                   ),
                 );
               },
             ),
-            SizedBox(height: 25),
+            const SizedBox(height: 25),
             ScaleTransition(
               scale: _bounceAnimation,
               child: Text(
                 "SnapEZ",
                 style: TextStyle(
-                  fontSize: 34,
+                  fontSize: isWide ? 44 : 34,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 1.2,
                 ),
+                semanticsLabel: 'App name',
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             AnimatedOpacity(
               opacity: _fadeIn ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 800),
+              duration: const Duration(milliseconds: 800),
               child: AnimatedSlide(
-                offset: _fadeIn ? Offset(0, 0) : Offset(0, 0.4),
-                duration: Duration(milliseconds: 800),
+                offset: _fadeIn ? Offset(0, 0) : const Offset(0, 0.4),
+                duration: const Duration(milliseconds: 800),
                 curve: Curves.easeOut,
                 child: Text(
                   "Save • Pay • Secure",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: isWide ? 22 : 18,
                     color: Colors.white.withOpacity(0.9),
                   ),
+                  semanticsLabel: 'App slogan',
                 ),
               ),
             ),

@@ -15,27 +15,39 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   }
 
   Future<void> _onLoad(LoadNotifications event, Emitter<NotificationState> emit) async {
-    emit(NotificationLoading());
+  emit(NotificationLoading());
     try {
       final notifs = await repository.getNotifications();
       emit(NotificationsLoaded(notifs));
     } catch (e) {
-      emit(NotificationError(e.toString()));
+      emit(NotificationError('Failed to load notifications: $e'));
     }
   }
 
   Future<void> _onAdd(AddNotification event, Emitter<NotificationState> emit) async {
-    await repository.addNotification(event.notification);
-    add(LoadNotifications());
+    try {
+      await repository.addNotification(event.notification);
+  add(LoadNotifications());
+    } catch (e) {
+      emit(NotificationError('Failed to add notification: $e'));
+    }
   }
 
   Future<void> _onMarkRead(MarkNotificationAsRead event, Emitter<NotificationState> emit) async {
-    await repository.markAsRead(event.id);
-    add(LoadNotifications());
+    try {
+      await repository.markAsRead(event.id);
+  add(LoadNotifications());
+    } catch (e) {
+      emit(NotificationError('Failed to mark notification as read: $e'));
+    }
   }
 
   Future<void> _onClear(ClearNotifications event, Emitter<NotificationState> emit) async {
-    await repository.clearAll();
-    add(LoadNotifications());
+    try {
+      await repository.clearAll();
+  add(LoadNotifications());
+    } catch (e) {
+      emit(NotificationError('Failed to clear notifications: $e'));
+    }
   }
 }

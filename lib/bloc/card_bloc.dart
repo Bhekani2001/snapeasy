@@ -3,7 +3,6 @@ import 'package:snapeasy/bloc/card_event.dart';
 import 'package:snapeasy/bloc/card_state.dart';
 import 'package:snapeasy/models/card_model.dart';
 import 'package:snapeasy/view_models/card_viewmodel.dart';
-// CardViewModel now uses SQLite for all card operations
 
 class CardBloc extends Bloc<CardEvent, CardState> {
   final CardViewModel viewModel;
@@ -18,15 +17,14 @@ class CardBloc extends Bloc<CardEvent, CardState> {
     on<FilterCardsByCountry>(_onFilterCardsByCountry);
   }
 
-
   Future<void> _onInitialize(InitializeCards event, Emitter<CardState> emit) async {
     emit(CardLoading());
     try {
       await viewModel.initialize();
       emit(CardsInitialized());
       add(LoadCards());
-    } catch (e) {
-      emit(CardError('Initialization failed: ${e.toString()}'));
+    } catch (e, st) {
+      emit(CardError('Initialization failed: $e'));
     }
   }
 
@@ -35,8 +33,8 @@ class CardBloc extends Bloc<CardEvent, CardState> {
     try {
       final cards = await viewModel.getCards();
       emit(CardsLoaded(cards));
-    } catch (e) {
-      emit(CardError('Failed to load cards: ${e.toString()}'));
+    } catch (e, st) {
+      emit(CardError('Failed to load cards: $e'));
     }
   }
 
@@ -45,19 +43,18 @@ class CardBloc extends Bloc<CardEvent, CardState> {
     try {
       final validation = await viewModel.validateCard(event.card);
       if (!validation.isValid) {
-        emit(CardError(validation.error!));
+        emit(CardError(validation.error ?? 'Validation failed'));
         return;
       }
-
       final result = await viewModel.addCard(event.card);
       if (result.success) {
         emit(CardAdded(event.card));
         add(LoadCards());
       } else {
-        emit(CardError(result.error!));
+        emit(CardError(result.error ?? 'Failed to add card'));
       }
-    } catch (e) {
-      emit(CardError('Failed to add card: ${e.toString()}'));
+    } catch (e, st) {
+      emit(CardError('Failed to add card: $e'));
     }
   }
 
@@ -66,13 +63,11 @@ class CardBloc extends Bloc<CardEvent, CardState> {
     try {
       final validation = await viewModel.validateCard(event.card);
       if (!validation.isValid) {
-        emit(CardError(validation.error!));
+        emit(CardError(validation.error ?? 'Validation failed'));
         return;
       }
-
       final result = await viewModel.updateCard(event.card);
       if (result.success) {
-        // Reload the card from DB to get the updated fields
         final cards = await viewModel.getCards();
         final updatedCard = cards.firstWhere(
           (c) => c.id == event.card.id,
@@ -81,10 +76,10 @@ class CardBloc extends Bloc<CardEvent, CardState> {
         emit(CardUpdated(updatedCard));
         add(LoadCards());
       } else {
-        emit(CardError(result.error!));
+        emit(CardError(result.error ?? 'Failed to update card'));
       }
-    } catch (e) {
-      emit(CardError('Failed to update card: ${e.toString()}'));
+    } catch (e, st) {
+      emit(CardError('Failed to update card: $e'));
     }
   }
 
@@ -94,8 +89,8 @@ class CardBloc extends Bloc<CardEvent, CardState> {
       await viewModel.removeCard(event.id);
       emit(CardRemoved(event.id));
       add(LoadCards());
-    } catch (e) {
-      emit(CardError('Failed to remove card: ${e.toString()}'));
+    } catch (e, st) {
+      emit(CardError('Failed to remove card: $e'));
     }
   }
 
@@ -105,8 +100,8 @@ class CardBloc extends Bloc<CardEvent, CardState> {
       await viewModel.clearAllCards();
       emit(AllCardsCleared());
       add(LoadCards());
-    } catch (e) {
-      emit(CardError('Failed to clear cards: ${e.toString()}'));
+    } catch (e, st) {
+      emit(CardError('Failed to clear cards: $e'));
     }
   }
 
@@ -115,8 +110,8 @@ class CardBloc extends Bloc<CardEvent, CardState> {
     try {
       final cards = await viewModel.getCardsByCountry(event.country);
       emit(CardsFiltered(cards, event.country));
-    } catch (e) {
-      emit(CardError('Failed to filter cards: ${e.toString()}'));
+    } catch (e, st) {
+      emit(CardError('Failed to filter cards: $e'));
     }
   }
 }

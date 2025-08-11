@@ -4,28 +4,48 @@ import 'package:snapeasy/views/add_card_scan_screen.dart';
 
 class NavActions {
   static void showCardsAction(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MyCardsScreen()),
-    );
+    if (!Navigator.canPop(context)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MyCardsScreen()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MyCardsScreen()),
+      );
+    }
   }
 
   static void openAddCardScanner(BuildContext context) {
-    Navigator.push(
-      context,
+    Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(builder: (context) => AddCardScanScreen()),
     );
   }
 
   static void showTransactionsAction(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Opening Transactions...")),
-    );
+    _showSnackBar(context, _transactionsSnackBar);
   }
 
   static void showMenuAction(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Opening Menu...")),
-    );
+    _showSnackBar(context, _menuSnackBar);
   }
+
+  static void _showSnackBar(BuildContext context, SnackBar snackBar) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
+  }
+
+  static const SnackBar _transactionsSnackBar = SnackBar(
+    content: Text("Opening Transactions..."),
+    duration: Duration(seconds: 2),
+    behavior: SnackBarBehavior.floating,
+  );
+
+  static const SnackBar _menuSnackBar = SnackBar(
+    content: Text("Opening Menu..."),
+    duration: Duration(seconds: 2),
+    behavior: SnackBarBehavior.floating,
+  );
 }

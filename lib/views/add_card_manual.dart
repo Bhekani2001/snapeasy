@@ -31,7 +31,7 @@ class _AddCardManualScreenState extends State<AddCardManualScreen> {
     final repo = BlocProvider.of<CardBloc>(context).viewModel.repository;
     String type = '';
     if (repo is CardRepoImpl) {
-      type = repo.detectCardType(cardNumber);
+      type = CardRepoImpl.detectCardType(cardNumber);
     } else {
       if (cardNumber.startsWith('4')) type = 'visa';
       else if (cardNumber.startsWith('5')) type = 'mastercard';
@@ -102,7 +102,7 @@ class _AddCardManualScreenState extends State<AddCardManualScreen> {
     final repo = BlocProvider.of<CardBloc>(context).viewModel.repository;
     String type = '';
     if (repo is CardRepoImpl) {
-      type = repo.detectCardType(cardNumber);
+      type = CardRepoImpl.detectCardType(cardNumber);
     } else {
       // Fallback logic if repo is not CardRepoImpl
       if (cardNumber.startsWith('4')) type = 'visa';
@@ -143,7 +143,7 @@ class _AddCardManualScreenState extends State<AddCardManualScreen> {
       final repo = BlocProvider.of<CardBloc>(context).viewModel.repository;
       String detectedCardType = '';
       if (repo is CardRepoImpl) {
-        detectedCardType = repo.detectCardType(_cardNumberController.text);
+        detectedCardType = CardRepoImpl.detectCardType(_cardNumberController.text);
       } else {
         final cardNumber = _cardNumberController.text;
         if (cardNumber.startsWith('4')) detectedCardType = 'visa';

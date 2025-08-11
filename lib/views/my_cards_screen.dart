@@ -27,7 +27,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Your SnapEZ Cards',
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
         ),
@@ -35,7 +35,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -46,29 +46,28 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
       body: BlocBuilder<CardBloc, CardState>(
         builder: (context, state) {
           if (state is CardLoading) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (state is CardsLoaded) {
             if (state.cards.isEmpty) {
-              return Center(child: Text('No cards found.'));
+              return const Center(child: Text('No cards found.'));
             }
             return ListView.builder(
-              padding: EdgeInsets.fromLTRB(16, 10, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
               itemCount: state.cards.length + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  // Slide hint message at the top
                   return Container(
-                    margin: EdgeInsets.only(bottom: 14),
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                     decoration: BoxDecoration(
-                      color: Color(0xFFE8F5E9),
+                      color: const Color(0xFFE8F5E9),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.swipe, color: Color(0xFF56ab2f), size: 20),
-                        SizedBox(width: 8),
-                        Expanded(
+                        const Icon(Icons.swipe, color: Color(0xFF56ab2f), size: 20),
+                        const SizedBox(width: 8),
+                        const Expanded(
                           child: Text(
                             "Slide left on a card to see actions",
                             style: TextStyle(
@@ -95,7 +94,10 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                         children: [
                           SlidableAction(
                             onPressed: (context) {
-                              // Add your delete logic here
+                              BlocProvider.of<CardBloc>(context).add(RemoveCard(card.id));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Card deleted.'), backgroundColor: Colors.redAccent),
+                              );
                             },
                             backgroundColor: Colors.redAccent,
                             foregroundColor: Colors.white,
@@ -107,7 +109,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                       ),
                       child: CardFlipWidget(card: card),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 );
               },
@@ -115,7 +117,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
           } else if (state is CardError) {
             return Center(child: Text(state.message));
           }
-          return Center(child: Text('No cards found.'));
+          return const Center(child: Text('No cards found.'));
         },
       ),
     );
@@ -142,29 +144,29 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return AnimatedPadding(
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Center(
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-              padding: EdgeInsets.all(24),
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 16)],
+                boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 16)],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lock_outline, color: Color(0xFF2980B9), size: 40),
-                  SizedBox(height: 12),
-                  Text('Enter Card PIN',
+                  const Icon(Icons.lock_outline, color: Color(0xFF2980B9), size: 40),
+                  const SizedBox(height: 12),
+                  const Text('Enter Card PIN',
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2980B9))),
-                  SizedBox(height: 18),
-                  Text('To view card details, please enter your 6-digit PIN.',
+                  const SizedBox(height: 18),
+                  const Text('To view card details, please enter your 6-digit PIN.',
                       style: TextStyle(fontSize: 16, color: Colors.black87), textAlign: TextAlign.center),
-                  SizedBox(height: 18),
+                  const SizedBox(height: 18),
                   TextField(
                     controller: pinController,
                     keyboardType: TextInputType.number,
@@ -172,32 +174,32 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
                     maxLength: 6,
                     decoration: InputDecoration(
                       labelText: 'PIN',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       errorText: error ? 'Incorrect PIN!' : null,
                     ),
                   ),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          child: Text('Cancel'),
+                          child: const Text('Cancel'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Color(0xFF2980B9),
-                            side: BorderSide(color: Color(0xFF2980B9)),
+                            foregroundColor: const Color(0xFF2980B9),
+                            side: const BorderSide(color: Color(0xFF2980B9)),
                           ),
                           onPressed: () => Navigator.of(context).pop(false),
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          child: Text('Unlock'),
+                          child: const Text('Unlock'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF2980B9),
+                            backgroundColor: const Color(0xFF2980B9),
                             foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            textStyle: TextStyle(fontSize: 18),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            textStyle: const TextStyle(fontSize: 18),
                           ),
                           onPressed: () {
                             if (pinController.text == widget.card.pin) {
@@ -205,7 +207,7 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
                             } else {
                               error = true;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Incorrect PIN!'), backgroundColor: Colors.redAccent),
+                                const SnackBar(content: Text('Incorrect PIN!'), backgroundColor: Colors.redAccent),
                               );
                             }
                           },
@@ -236,7 +238,7 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
       onTap: _requestPinAndFlip,
       child: TweenAnimationBuilder(
         tween: Tween<double>(begin: 0, end: _isFlipped ? pi : 0),
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
         builder: (context, double angle, child) {
           final isBack = angle > pi / 2;
@@ -264,16 +266,16 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFF56ab2f), Color(0xFF2980B9)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 16, offset: Offset(0, 6))],
+        boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 16, offset: Offset(0, 6))],
       ),
       child: Stack(
         children: [
-          Positioned(
+          const Positioned(
             top: 20,
             right: 20,
             child: Icon(Icons.credit_card, color: Colors.white70, size: 32),
@@ -289,21 +291,21 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
                 color: Colors.amber[200],
               ),
               child: Center(
-                child: Text(card.cardType ?? '', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(card.cardType ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ),
           Positioned(
             top: 100,
             left: 20,
-            child: Text(card.bankName ?? '', style: TextStyle(color: Colors.white, fontSize: 14)),
+            child: Text(card.bankName ?? '', style: const TextStyle(color: Colors.white, fontSize: 14)),
           ),
           Positioned(
             bottom: 50,
             left: 20,
             child: Text(
               '${card.firstName} ${card.lastName}',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           Positioned(
@@ -311,7 +313,7 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
             left: 20,
             child: Text(
               '•••• •••• •••• ${card.cardNumber.substring(card.cardNumber.length - 4)}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 letterSpacing: 2,
@@ -330,40 +332,40 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFF2980B9), Color(0xFF56ab2f)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 16, offset: Offset(0, 6))],
+        boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 16, offset: Offset(0, 6))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             height: 40,
-            margin: EdgeInsets.only(top: 20),
+            margin: const EdgeInsets.only(top: 20),
             color: Colors.black87,
             child: Center(
-              child: Text(card.cardType ?? '', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text(card.cardType ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Card Number: ${card.cardNumber}', style: TextStyle(color: Colors.white, fontSize: 16)),
-                SizedBox(height: 8),
-                Text('CVV: ${card.cvv}', style: TextStyle(color: Colors.white, fontSize: 16)),
-                SizedBox(height: 8),
-                Text('Expiry: ${card.expiry}', style: TextStyle(color: Colors.white, fontSize: 16)),
-                SizedBox(height: 8),
-                Text('Country: ${card.country}', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                Text('City: ${card.city}', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                SizedBox(height: 8),
-                Text('Bank: ${card.bankName ?? ''}', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                Text('Card Number: ${card.cardNumber}', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                const SizedBox(height: 8),
+                Text('CVV: ${card.cvv}', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                const SizedBox(height: 8),
+                Text('Expiry: ${card.expiry}', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                const SizedBox(height: 8),
+                Text('Country: ${card.country}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                Text('City: ${card.city}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                const SizedBox(height: 8),
+                Text('Bank: ${card.bankName ?? ''}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
               ],
             ),
           ),

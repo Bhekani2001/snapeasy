@@ -6,30 +6,34 @@ class HomeQuickActions extends StatelessWidget {
   const HomeQuickActions({Key? key}) : super(key: key);
 
   Widget _actionCard(String title, IconData icon, VoidCallback onTap) {
-    return SizedBox(
-      width: 120,
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(15),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 32, color: const Color(0xFF2980B9)),
-                const SizedBox(height: 10),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+    return Semantics(
+      label: title,
+      button: true,
+      child: SizedBox(
+        width: 120,
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(15),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 32, color: const Color(0xFF2980B9)),
+                  const SizedBox(height: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -48,7 +52,6 @@ class HomeQuickActions extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header Icon
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -58,23 +61,17 @@ class HomeQuickActions extends StatelessWidget {
                   child: const Icon(Icons.construction, size: 48, color: Color(0xFF2980B9)),
                 ),
                 const SizedBox(height: 16),
-
-                // Title
                 const Text(
                   "Coming Soon!",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-
-                // Description
                 const Text(
                   "We're working hard to bring you this feature. Stay tuned!",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 20),
-
-                // Close Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -93,6 +90,7 @@ class HomeQuickActions extends StatelessWidget {
           ),
         );
       },
+      barrierDismissible: true,
     );
   }
 

@@ -11,9 +11,12 @@ import 'package:snapeasy/db/database_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  final cardRepo = await DatabaseProvider.getCardRepo();
-  runApp(MyApp(cardRepository: cardRepo));
+  try {
+    final cardRepo = await DatabaseProvider().getCardRepo();
+    runApp(MyApp(cardRepository: cardRepo));
+  } catch (e) {
+    runApp(const ErrorApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -31,6 +34,11 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2980B9)),
+          useMaterial3: true,
+          fontFamily: 'Poppins',
+        ),
         home: RepositoryProvider(
           create: (context) => cardRepository,
           child: SplashScreen(),
@@ -48,7 +56,7 @@ class ErrorApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Text('Failed to initialize app', style: TextStyle(color: Colors.red)),
+          child: Text('Failed to initialize app', style: TextStyle(color: Colors.red, fontSize: 18)),
         ),
       ),
     );
