@@ -238,109 +238,189 @@ class _AddCardManualScreenState extends State<AddCardManualScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Add Card Manually', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: InputDecoration(labelText: 'First Name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 600;
+        return Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 500),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                colors: [Colors.white.withOpacity(0.85), Colors.white.withOpacity(0.65)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: InputDecoration(labelText: 'Last Name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _cardNumberController,
-                decoration: InputDecoration(
-                  labelText: 'Card Number',
-                  suffixIcon: _cardTypeIcon(_cardNumberController.text),
-                  errorText: _cardNumberController.text.isEmpty
-                      ? null
-                      : _getCardNumberError(_cardNumberController.text),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 24,
+                  offset: Offset(0, 8),
                 ),
-                keyboardType: TextInputType.number,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : _getCardNumberError(v),
-  onChanged: (_) => setState(() {}),
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _cvvController,
-                decoration: InputDecoration(labelText: 'CVV'),
-                keyboardType: TextInputType.number,
-                obscureText: true,
-                maxLength: 4,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _expiryController,
-                decoration: InputDecoration(labelText: 'Expiry Date (MM/YY)'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: _selectedCountry,
-                decoration: InputDecoration(labelText: 'Country'),
-                items: worldCountries.map((country) {
-                  return DropdownMenuItem<String>(
-                    value: country.name,
-                    child: Text(country.name + (country.bannedMastercard ? ' (Banned for Mastercards)' : '')),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCountry = value;
-                  });
-                },
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _cityController,
-                decoration: InputDecoration(labelText: 'City'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _pinController,
-                decoration: InputDecoration(labelText: 'Card PIN'),
-                keyboardType: TextInputType.number,
-                obscureText: true,
-                maxLength: 6,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton.icon(
-                icon: Icon(Icons.save),
-                label: Text('Save Card'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF56ab2f),
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  textStyle: TextStyle(fontSize: 18),
+              ],
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.add_card, color: Color(0xFF56ab2f), size: 32),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Add Card Manually',
+                              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      TextFormField(
+                        controller: _firstNameController,
+                        decoration: InputDecoration(
+                          labelText: 'First Name',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        textInputAction: TextInputAction.next,
+                      ),
+                      SizedBox(height: 12),
+                      TextFormField(
+                        controller: _lastNameController,
+                        decoration: InputDecoration(
+                          labelText: 'Last Name',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        textInputAction: TextInputAction.next,
+                      ),
+                      SizedBox(height: 12),
+                      TextFormField(
+                        controller: _cardNumberController,
+                        decoration: InputDecoration(
+                          labelText: 'Card Number',
+                          suffixIcon: _cardTypeIcon(_cardNumberController.text),
+                          errorText: _cardNumberController.text.isEmpty
+                              ? null
+                              : _getCardNumberError(_cardNumberController.text),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : _getCardNumberError(v),
+                        onChanged: (_) => setState(() {}),
+                        textInputAction: TextInputAction.next,
+                      ),
+                      SizedBox(height: 12),
+                      TextFormField(
+                        controller: _cvvController,
+                        decoration: InputDecoration(
+                          labelText: 'CVV',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        keyboardType: TextInputType.number,
+                        obscureText: true,
+                        maxLength: 4,
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        textInputAction: TextInputAction.next,
+                      ),
+                      SizedBox(height: 12),
+                      TextFormField(
+                        controller: _expiryController,
+                        decoration: InputDecoration(
+                          labelText: 'Expiry Date (MM/YY)',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        textInputAction: TextInputAction.next,
+                      ),
+                      SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        value: _selectedCountry,
+                        decoration: InputDecoration(
+                          labelText: 'Country',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        items: worldCountries.map((country) {
+                          return DropdownMenuItem<String>(
+                            value: country.name,
+                            child: Text(country.name + (country.bannedMastercard ? ' (Banned for Mastercards)' : '')),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCountry = value;
+                          });
+                        },
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                      ),
+                      SizedBox(height: 12),
+                      TextFormField(
+                        controller: _cityController,
+                        decoration: InputDecoration(
+                          labelText: 'City',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        textInputAction: TextInputAction.next,
+                      ),
+                      SizedBox(height: 12),
+                      TextFormField(
+                        controller: _pinController,
+                        decoration: InputDecoration(
+                          labelText: 'Card PIN',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        keyboardType: TextInputType.number,
+                        obscureText: true,
+                        maxLength: 6,
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        textInputAction: TextInputAction.done,
+                      ),
+                      SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.save),
+                        label: Text('Save Card'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF56ab2f),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                          textStyle: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 4,
+                        ),
+                        onPressed: _submit,
+                      ),
+                    ],
+                  ),
                 ),
-                onPressed: _submit,
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

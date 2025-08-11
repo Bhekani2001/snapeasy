@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:snapeasy/bloc/notification_bloc.dart';
+import 'package:snapeasy/bloc/notification_event.dart';
 import 'package:snapeasy/components/quick_actions/home_quick_actions.dart';
 import 'package:snapeasy/components/navigations/custom_bottom_nav_bar.dart';
 import 'package:snapeasy/components/navigations/nav_actions.dart';
@@ -7,6 +9,8 @@ import 'package:snapeasy/bloc/card_bloc.dart';
 import 'package:snapeasy/bloc/card_state.dart';
 import 'package:snapeasy/bloc/card_event.dart';
 import 'package:snapeasy/models/card_model.dart';
+import 'package:snapeasy/repositories/notification_repo_impl.dart';
+import 'package:snapeasy/views/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -188,6 +192,23 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
                 color: Color(0xFF2980B9), fontWeight: FontWeight.bold)),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications, color: Color(0xFF2980B9)),
+            tooltip: 'Notifications',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider<NotificationBloc>(
+                    create: (context) => NotificationBloc(NotificationRepoImpl())..add(LoadNotifications()),
+                    child:  NotificationScreen(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

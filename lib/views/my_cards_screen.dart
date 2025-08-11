@@ -135,9 +135,10 @@ class CardFlipWidget extends StatefulWidget {
 class _CardFlipWidgetState extends State<CardFlipWidget> {
   bool _isFlipped = false;
 
-  void _requestPinAndFlip() async {
+  Future<bool> _requestPin() async {
     final pinController = TextEditingController();
     bool error = false;
+
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -148,85 +149,100 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
           curve: Curves.easeOut,
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 16)],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.lock_outline, color: Color(0xFF2980B9), size: 40),
-                  const SizedBox(height: 12),
-                  const Text('Enter Card PIN',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2980B9))),
-                  const SizedBox(height: 18),
-                  const Text('To view card details, please enter your 6-digit PIN.',
-                      style: TextStyle(fontSize: 16, color: Colors.black87), textAlign: TextAlign.center),
-                  const SizedBox(height: 18),
-                  TextField(
-                    controller: pinController,
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    maxLength: 6,
-                    decoration: InputDecoration(
-                      labelText: 'PIN',
-                      border: const OutlineInputBorder(),
-                      errorText: error ? 'Incorrect PIN!' : null,
-                    ),
+            child: StatefulBuilder(
+              builder: (context, setModalState) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 16)],
                   ),
-                  const SizedBox(height: 24),
-                  Row(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          child: const Text('Cancel'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF2980B9),
-                            side: const BorderSide(color: Color(0xFF2980B9)),
-                          ),
-                          onPressed: () => Navigator.of(context).pop(false),
+                      const Icon(Icons.lock_outline, color: Color(0xFF2980B9), size: 40),
+                      const SizedBox(height: 12),
+                      const Text('Enter Card PIN',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2980B9))),
+                      const SizedBox(height: 18),
+                      const Text('To view card details, please enter your 6-digit PIN.',
+                          style: TextStyle(fontSize: 16, color: Colors.black87), textAlign: TextAlign.center),
+                      const SizedBox(height: 18),
+                      TextField(
+                        controller: pinController,
+                        keyboardType: TextInputType.number,
+                        obscureText: true,
+                        maxLength: 6,
+                        decoration: InputDecoration(
+                          labelText: 'PIN',
+                          border: const OutlineInputBorder(),
+                          errorText: error ? 'Incorrect PIN!' : null,
                         ),
+                        onChanged: (_) {
+                          if (error) {
+                            setModalState(() => error = false);
+                          }
+                        },
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          child: const Text('Unlock'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2980B9),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            textStyle: const TextStyle(fontSize: 18),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              child: const Text('Cancel'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF2980B9),
+                                side: const BorderSide(color: Color(0xFF2980B9)),
+                              ),
+                              onPressed: () => Navigator.of(context).pop(false),
+                            ),
                           ),
-                          onPressed: () {
-                            if (pinController.text == widget.card.pin) {
-                              Navigator.of(context).pop(true);
-                            } else {
-                              error = true;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Incorrect PIN!'), backgroundColor: Colors.redAccent),
-                              );
-                            }
-                          },
-                        ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              child: const Text('Unlock'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2980B9),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                textStyle: const TextStyle(fontSize: 18),
+                              ),
+                              onPressed: () {
+                                if (pinController.text == widget.card.pin) {
+                                  Navigator.of(context).pop(true);
+                                } else {
+                                  setModalState(() {
+                                    error = true;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Incorrect PIN!'), backgroundColor: Colors.redAccent),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         );
       },
     );
-    if (result == true) {
-      setState(() {
-        _isFlipped = !_isFlipped;
-      });
-    }
+
+    return result ?? false;
+  }
+
+  String getFormattedCardType(String? type) {
+    if (type == null) return '';
+    final lower = type.toLowerCase();
+    if (lower == 'mastercard') return 'MasterCard';
+    return type;
   }
 
   @override
@@ -235,7 +251,16 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
     final double cardHeight = cardWidth / 1.58;
 
     return GestureDetector(
-      onTap: _requestPinAndFlip,
+      onTap: () async {
+        if (!_isFlipped) {
+          final unlocked = await _requestPin();
+          if (unlocked) {
+            setState(() => _isFlipped = true);
+          }
+        } else {
+          setState(() => _isFlipped = false);
+        }
+      },
       child: TweenAnimationBuilder(
         tween: Tween<double>(begin: 0, end: _isFlipped ? pi : 0),
         duration: const Duration(milliseconds: 500),
@@ -284,21 +309,35 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
             top: 50,
             left: 20,
             child: Container(
-              width: 50,
+              width: 70,
               height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
                 color: Colors.amber[200],
               ),
               child: Center(
-                child: Text(card.cardType ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                  getFormattedCardType(card.cardType),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ),
           Positioned(
             top: 100,
             left: 20,
-            child: Text(card.bankName ?? '', style: const TextStyle(color: Colors.white, fontSize: 14)),
+            child: SizedBox(
+              width: width * 0.6, 
+              child: Text(
+                card.bankName ?? '',
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
           Positioned(
             bottom: 50,
@@ -339,37 +378,46 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
         ),
         boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 16, offset: Offset(0, 6))],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 40,
-            margin: const EdgeInsets.only(top: 20),
-            color: Colors.black87,
-            child: Center(
-              child: Text(card.cardType ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 40,
+              margin: const EdgeInsets.only(top: 20),
+              color: Colors.black87,
+              child: Center(
+                child: Text(
+                  getFormattedCardType(card.cardType),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Card Number: ${card.cardNumber}', style: const TextStyle(color: Colors.white, fontSize: 16)),
-                const SizedBox(height: 8),
-                Text('CVV: ${card.cvv}', style: const TextStyle(color: Colors.white, fontSize: 16)),
-                const SizedBox(height: 8),
-                Text('Expiry: ${card.expiry}', style: const TextStyle(color: Colors.white, fontSize: 16)),
-                const SizedBox(height: 8),
-                Text('Country: ${card.country}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
-                Text('City: ${card.city}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
-                const SizedBox(height: 8),
-                Text('Bank: ${card.bankName ?? ''}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
-              ],
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Card Number: ${card.cardNumber}',
+                      style: const TextStyle(color: Colors.white, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  Text('CVV: ${card.cvv}', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  Text('Expiry: ${card.expiry}', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  Text('Country: ${card.country}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                  Text('City: ${card.city}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                  const SizedBox(height: 8),
+                  Text('Bank: ${card.bankName ?? ''}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                  const SizedBox(height: 12), 
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
