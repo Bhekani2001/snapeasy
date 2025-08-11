@@ -69,6 +69,46 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
 
   void _continueToManualForm() async {
     if (_cardDetails == null) return;
+    // Check if card already exists
+    final cardBloc = BlocProvider.of<CardBloc>(context);
+    final repo = cardBloc.viewModel.repository;
+    final cardNumber = _cardDetails!.cardNumber;
+    bool exists = false;
+    if (repo is CardRepoImpl) {
+      exists = await repo.isCardExists(cardNumber ?? '');
+    }
+    if (exists) {
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Duplicate Card', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                SizedBox(height: 16),
+                Icon(Icons.warning, color: Colors.orange, size: 48),
+                SizedBox(height: 16),
+                Text('This card is already saved in your wallet.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+                SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      child: Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,

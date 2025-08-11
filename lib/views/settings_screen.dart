@@ -1,163 +1,104 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen>
-    with TickerProviderStateMixin {
-  final settings = [
-    {'title': 'Card Settings', 'icon': Icons.credit_card, 'onTap': () {}},
-    {'title': 'Transaction Settings', 'icon': Icons.receipt_long, 'onTap': () {}},
-    {'title': 'Notifications', 'icon': Icons.notifications, 'onTap': () {}},
-    {'title': 'Security', 'icon': Icons.lock, 'onTap': () {}},
-    {'title': 'About', 'icon': Icons.info, 'onTap': () {}},
+  final settings = const [
+    {'title': 'Card Settings', 'icon': Icons.credit_card},
+    {'title': 'Transaction Settings', 'icon': Icons.receipt_long},
+    {'title': 'Notifications', 'icon': Icons.notifications},
+    {'title': 'Security', 'icon': Icons.lock},
+    {'title': 'About', 'icon': Icons.info},
   ];
 
-  // Top card anims
-  late final AnimationController _cardController;
-  late final Animation<Offset> _cardSlide;
-  late final Animation<double> _cardScale;
+  Widget _glassContainer({required Widget child, double borderRadius = 20}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.15),
+                Colors.white.withOpacity(0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1.2,
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
 
-  // List anims
-  late final List<AnimationController> _controllers;
-  late final List<Animation<double>> _fadeAnimations;
-  late final List<Animation<Offset>> _slideAnimations;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Top card animation controller + animations
-    _cardController = AnimationController(
-      vsync: this,
+  Widget _buildTopCard(BuildContext context) {
+    return BounceInDown(
       duration: const Duration(milliseconds: 800),
-    );
-
-    _cardSlide = Tween<Offset>(
-      begin: const Offset(0, -0.5),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _cardController,
-      curve: Curves.easeOutBack,
-    ));
-
-    _cardScale = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(parent: _cardController, curve: Curves.elasticOut),
-    );
-
-    // Generate controllers for each list item
-    _controllers = List.generate(settings.length, (index) {
-      return AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 500),
-      );
-    });
-
-    // Create fade & slide animations for each controller
-    _fadeAnimations = _controllers
-        .map((controller) => CurvedAnimation(parent: controller, curve: Curves.easeOut))
-        .toList();
-
-    _slideAnimations = _controllers
-        .map((controller) => Tween<Offset>(
-              begin: const Offset(0, 0.2),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(parent: controller, curve: Curves.elasticOut)),
-        )
-        .toList();
-
-    // Start animations (card first, then staggered list)
-    _playAnimations();
-  }
-
-  Future<void> _playAnimations() async {
-    _cardController.forward();
-    // Wait a little so top card appears first
-    await Future.delayed(const Duration(milliseconds: 360));
-
-    for (var i = 0; i < _controllers.length; i++) {
-      // small delay between items
-      await Future.delayed(const Duration(milliseconds: 110));
-      _controllers[i].forward();
-    }
-  }
-
-  @override
-  void dispose() {
-    _cardController.dispose();
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  Widget _buildTopCard() {
-    return ScaleTransition(
-      scale: _cardScale,
-      child: SlideTransition(
-        position: _cardSlide,
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          color: const Color(0xFF2980B9),
-          elevation: 6,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 36, color: Color(0xFF2980B9)),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    "Welcome back,\nHere's your settings hub!",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      height: 1.3,
-                    ),
+      child: _glassContainer(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 28,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person, size: 36, color: Color(0xFF2980B9)),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  "Welcome back,\nHere's your settings hub!",
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSettingTile(Map<String, dynamic> item, int index) {
-    return SlideTransition(
-      position: _slideAnimations[index],
-      child: FadeTransition(
-        opacity: _fadeAnimations[index],
+  Widget _buildSettingTile(BuildContext context, Map<String, dynamic> item, int index) {
+    return FadeInUp(
+      duration: Duration(milliseconds: 400 + (index * 100)),
+      child: _glassContainer(
+        borderRadius: 14,
         child: InkWell(
-          onTap: item['onTap'] as VoidCallback,
-          splashColor: Colors.blue.withOpacity(0.08),
-          highlightColor: Colors.blue.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {},
+          splashColor: Colors.white.withOpacity(0.05),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                Icon(item['icon'] as IconData, color: const Color(0xFF2980B9)),
+                Icon(item['icon'] as IconData, color: Colors.white, size: 26),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     item['title'] as String,
-                    style: const TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.grey),
+                const Icon(Icons.chevron_right, color: Colors.white70),
               ],
             ),
           ),
@@ -168,26 +109,36 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: const Color(0xFF2980B9),
-        elevation: 0,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1E3C72), Color(0xFF2A5298)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
-      body: ListView.separated(
-        physics: const BouncingScrollPhysics(),
-        itemCount: settings.length + 1,
-        separatorBuilder: (_, __) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: _buildTopCard(),
-            );
-          }
-          return _buildSettingTile(settings[index - 1], index - 1);
-        },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text(
+            'Settings',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: ListView.separated(
+          physics: const BouncingScrollPhysics(),
+          itemCount: settings.length + 1,
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          padding: const EdgeInsets.all(16),
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return _buildTopCard(context);
+            }
+            return _buildSettingTile(context, settings[index - 1], index - 1);
+          },
+        ),
       ),
     );
   }

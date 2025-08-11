@@ -1,8 +1,45 @@
 import 'package:snapeasy/models/card_model.dart';
 import 'package:snapeasy/repositories/card_repository.dart';
+import 'package:snapeasy/view_models/notification_viewmodel.dart';
+import 'package:snapeasy/models/notification_model.dart';
 
 
 class CardViewModel {
+  // Call this after loading cards or adding a card
+  Future<void> checkExpiringCardsAndNotify(NotificationViewModel notificationVM) async {
+    final cards = await getCards();
+    final now = DateTime.now();
+    for (final card in cards) {
+      // Parse expiry date (MM/YY)
+      try {
+        final parts = card.expiry.split('/');
+        if (parts.length == 2) {
+          final month = int.tryParse(parts[0]);
+          final year = int.tryParse(parts[1]);
+          if (month != null && year != null) {
+            // Assume year is 2 digits
+            final expiryDate = DateTime(2000 + year, month + 1, 0);
+            final diff = expiryDate.difference(now).inDays;
+            if (diff <= 90 && diff > 0) {
+              // Check if notification already exists
+              final title = 'Card Expiry Reminder';
+              final body = 'Your card ending in ${card.cardNumber.substring(card.cardNumber.length - 4)} expires in less than 3 months.';
+              final notifs = await notificationVM.getNotifications();
+              final exists = notifs.any((n) => n.body == body);
+              if (!exists) {
+                await notificationVM.addNotification(NotificationModel(
+                  id: DateTime.now().microsecondsSinceEpoch.toString(),
+                  title: title,
+                  body: body,
+                  date: now,
+                ));
+              }
+            }
+          }
+        }
+      } catch (_) {}
+    }
+  }
   final CardRepository repository;
 
   CardViewModel(this.repository);
@@ -16,7 +53,6 @@ class CardViewModel {
       if (await repository.isCardExists(card.cardNumber)) {
         return (success: false, error: 'Card with this number already exists');
       }
-      // Always auto-detect cardType and bankName before saving
       final detectedCardType = card.cardType ?? _detectCardType(card.cardNumber);
       final detectedBankName = card.bankName ?? _detectBankName(card.cardNumber);
       final updatedCard = CardModel(
@@ -57,7 +93,6 @@ class CardViewModel {
 
   Future<({bool success, String? error})> updateCard(CardModel card) async {
     try {
-      // Always auto-detect cardType and bankName before updating
       final detectedCardType = card.cardType ?? _detectCardType(card.cardNumber);
       final detectedBankName = card.bankName ?? _detectBankName(card.cardNumber);
       final updatedCard = CardModel(
