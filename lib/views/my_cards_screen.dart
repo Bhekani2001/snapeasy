@@ -49,7 +49,47 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (state is CardsLoaded) {
             if (state.cards.isEmpty) {
-              return const Center(child: Text('No cards found.'));
+              return Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF56ab2f), Color(0xFF2980B9)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      const BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(0, 6))
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.credit_card_off, size: 50, color: Colors.white70),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "No cards found",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "You haven’t added any SnapEZ cards yet.\nTap the + button to add your first card.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
             return ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
@@ -330,7 +370,7 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
             top: 100,
             left: 20,
             child: SizedBox(
-              width: width * 0.6, 
+              width: width * 0.6,
               child: Text(
                 card.bankName ?? '',
                 style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -412,7 +452,7 @@ class _CardFlipWidgetState extends State<CardFlipWidget> {
                   Text('City: ${card.city}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
                   const SizedBox(height: 8),
                   Text('Bank: ${card.bankName ?? ''}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
-                  const SizedBox(height: 12), 
+                  const SizedBox(height: 12),
                 ],
               ),
             ),

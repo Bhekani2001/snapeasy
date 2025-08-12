@@ -27,26 +27,22 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
     if (cardNumber == null || cardNumber.length < 6) return null;
     final bin = cardNumber.substring(0, 6);
     switch (bin) {
-      // Capitec Bank
       case '528497':
       case '528498':
       case '528499':
         return 'Capitec Bank';
 
-      // Absa Bank
       case '603493':
       case '603494':
       case '627010':
         return 'Absa Bank';
 
-      // FNB (First National Bank)
       case '520000':
       case '520001':
       case '436414':
       case '521234':
         return 'FNB';
 
-      // Nedbank (specific bins)
       case '450801':
       case '450802':
       case '450803':
@@ -218,48 +214,7 @@ class _AddCardScanScreenState extends State<AddCardScanScreen> {
                           _infoRow("Card Type:", _cardType!),
                         if (_bankName != null)
                           _infoRow("Bank Name:", _bankName!),
-                        SizedBox(height: 24),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                          child: Column(
-                            children: [
-                              TextField(
-                                controller: _cvvController,
-                                keyboardType: TextInputType.number,
-                                maxLength: 4,
-                                decoration: InputDecoration(
-                                  labelText: 'CVV',
-                                  border: OutlineInputBorder(),
-                                  counterText: '',
-                                ),
-                                obscureText: true,
-                              ),
-                              SizedBox(height: 12),
-                              TextField(
-                                controller: _pinController,
-                                keyboardType: TextInputType.number,
-                                maxLength: 6,
-                                decoration: InputDecoration(
-                                  labelText: 'Card PIN',
-                                  border: OutlineInputBorder(),
-                                  counterText: '',
-                                ),
-                                obscureText: true,
-                              ),
-                            ],
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          icon: Icon(Icons.arrow_forward),
-                          label: Text('Continue'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF56ab2f),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                            textStyle: TextStyle(fontSize: 18),
-                          ),
-                          onPressed: _cvvController.text.isEmpty ? null : _continueToManualForm,
-                        ),
+                       
                       ],
                     ),
                   ),

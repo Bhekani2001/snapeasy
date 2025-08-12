@@ -98,9 +98,55 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 180, child: Center(child: CircularProgressIndicator()));
         } else if (state is CardsLoaded) {
           if (state.cards.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text("No cards found.", style: TextStyle(color: Colors.grey)),
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: GestureDetector(
+                onTap: _openAddCardScanner,
+                child: Container(
+                  width: double.infinity,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1E3C72), Color(0xFF2A5298)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.credit_card_off, color: Colors.white70, size: 48),
+                      SizedBox(height: 12),
+                      Text(
+                        "No cards found",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        "Tap here to add your first SnapEZ card.",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             );
           }
           final previewCards = state.cards.take(2).toList();
@@ -194,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications, color: Color(0xFF2980B9)),
+            icon: const Icon(Icons.notifications, color: Color(0xFF2980B9)),
             tooltip: 'Notifications',
             onPressed: () {
               Navigator.pushReplacement(
@@ -202,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(
                   builder: (context) => BlocProvider<NotificationBloc>(
                     create: (context) => NotificationBloc(NotificationRepoImpl())..add(LoadNotifications()),
-                    child:  NotificationScreen(),
+                    child: NotificationScreen(),
                   ),
                 ),
               );
